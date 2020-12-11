@@ -1,0 +1,5 @@
+#!/bin/sh
+
+eval $(crud)
+xwr drawterm exact "$W" "$H" "$X" "$Y" &
+nohup xterm -T drawterm -ti vt340 >/dev/null &

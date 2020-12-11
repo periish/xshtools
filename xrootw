@@ -1,0 +1,23 @@
+#!/bin/sh
+
+# watch root windows
+
+# state 0x100 - left mouse button
+# state 0x200 - scroll wheel click
+# state 0x400 - right mouse button
+# state 0x800 - scroll up
+# state 0x1000 - scroll down
+# the above are buttons 1-5
+# other buttons don't have a state, but do have button numbers
+# detect via adding *"button X"*) to the case
+
+xev -root -event button 2>&1 \
+| while read -r l; do
+    case $l in
+        "state 0x100"*)  : ;;
+        "state 0x200"*)  : ;;
+        "state 0x400"*)  p9menu ;;
+        "state 0x800"*)  : ;;
+        "state 0x1000"*) : ;;
+    esac
+done

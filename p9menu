@@ -1,0 +1,35 @@
+#!/bin/sh
+
+# Plan 9 style menu using xmenu(1), and xrw(1).
+
+dt () {
+    eval $(crud)
+    xwr drawterm exact "$W" "$H" "$X" "$Y" &
+    nohup xterm -T drawterm -ti vt340 >/dev/null &
+}
+
+rs () {
+    eval $(crud)
+    xwc exact "$W" "$H" "$X" "$Y" &
+}
+
+kw () {
+    rmdir "$WM/$(slw)"
+}
+
+func () {
+    read n
+    case $n in
+        New) dt    ;;
+        Resize) rs ;;
+        Delete) kw ;;
+        Snarf) snf ;;
+    esac
+}
+
+cat <<! | xmenu | func
+New
+Resize
+Delete
+Snarf
+!

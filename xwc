@@ -1,0 +1,73 @@
+#!/bin/sh
+
+# x11fs(1) window controller.
+# Expects $WM
+
+p () printf '%s\n' "$*"
+
+die () { p "$*" && exit "${status:-1}"; }
+
+tp () p "$1 $2" > "$WM"/"$wid"/geometry/position
+
+mv () p "$1 $2" > "$WM"/"$wid"/geometry/size
+
+bc () p "$1" > "$WM/$wid/border/color"
+
+bw () p "$1" > "$WM/$wid/border/width"
+
+f  ()  p "$wid" > "$WM/focused"
+
+m  () p "true"  > "$WM/$wid/mapped"
+
+um () p "false" > "$WM/$wid/mapped"
+
+ig () p "true" > "$WM/$wid/ignored"
+
+isig () sh "$WM/$wid/ignored"
+
+unig () p "false" > "$WM/$wid/ignored"
+
+exact () p "$@" > "$WM/$wid/geometry/all"
+
+push () {
+    read -r x y < "$WM/$wid/geometry/position"
+    p "$(( x + $1 )) $(( y + $2 ))" > "$WM/$wid/geometry/position"
+}
+
+stretch () {
+    read -r w h < "$WM/$wid/geometry/size"
+    p "$(( w + $1 )) $(( h + $2 ))" > "$WM/$wid/geometry/size"
+}
+#
+#centre () {
+#    read -r w h < "$WM/$wid/geometry/size"
+#    p "$(( $1 - ( w / 2 ))) $(( $2 - ( h / 2 )))" > "$WM/$wid/geometry/position"
+#}
+
+
+usage () {
+    p "xwc: x11fs(1) window controller"
+    p "takes arguments with an optional dash"
+}
+
+help () usage
+
+h () usage
+
+main () {
+    case $0 in
+        *xwc*) cmd="${1#-}"; shift 1 ;;
+        *) cmd="${0##*/}" cmd="${cmd%w}" ;;
+    esac
+
+    case $1 in
+        0x0???????) wid=$1; shift ;;
+        *) read -r wid < "$WM"/focused ;;
+    esac
+    case $(type $cmd) in
+        "$cmd is a function") $cmd "$@" ;;
+        *) die "'$cmd' not found" ;;
+    esac
+}
+
+main "$@"

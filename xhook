@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# react to events using x11fs(1)
+# requires $HOOK_DIR and $WM
+# i guess you could call this a wm, but that's not very productive now, is it?
+
+
+cat ${WM:?WM not in environment}/event |
+while read -r ev wid; do
+    #ev=$(echo "$ev" | tr '[:upper:]' '[:lower:]')
+    # i prefer lowercase hooks, and we have no ${,,} :/
+
+    [ -x "${HOOK_DIR:?HOOK_DIR not in environment}/$ev" ] \
+    && "$HOOK_DIR/$ev" "$wid"
+done

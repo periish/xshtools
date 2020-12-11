@@ -1,0 +1,33 @@
+#!/bin/sh
+
+date_time() {
+    date +"%R on %a, %Y-%m-%d"
+}
+
+
+batt () {
+    read -r batt < /sys/class/power_supply/BAT0/capacity
+    read -r status < /sys/class/power_supply/BAT0/status
+    case $status in
+        Charging) status='+' ;;
+        *) status='-' ;;
+    esac
+    printf '%s' "$batt%$status"
+}
+ws () {
+    # Temporary workspace.
+    printf '--+-\e[35m+\e[39m--'
+}
+
+delay="${1:-1.5}"
+shift 1
+[ "$1" ] || set -- date_time batt ws
+
+tput civis
+while sleep "$delay"; do
+    printf '\n'
+    for mod; do
+        printf " | %s" "$($mod)"
+    done
+    printf ' |'
+done

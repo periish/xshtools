@@ -1,0 +1,54 @@
+#!/bin/sh
+
+# X Virtual Desktops, via xwc(1)
+
+p () printf '%s\n' "$*"
+
+show_ws () {
+    while read -r line; do
+        xwc m "$line"
+    done < "$WS/$1"
+}
+
+hide_ws () {
+    while read -r line; do
+        xwc um "$line"
+    done < "$WS/$1"
+}
+
+swap () {
+    read -r cur < "$WS/current"
+    hide_ws "$cur" &
+    [ -e "$WS/$1" ] || :>"$WS/$1"
+    show_ws "$1" &
+    p "$1" > "$WS/current"
+}
+
+add_hook () {
+    read -r cur < "$WS/current"
+    p "$1" >> "$WS/$cur"
+}
+
+remove_hook () {
+    for f in "$WS"/*; do
+        sed "s/$1//g" -i "$f"
+    done
+}
+
+usage () {
+    p "swap to different workspaces via swap"
+    p "if those workspaces don't exist, they'll be created"
+    p "a hook, intended for use with xhook is provided"
+}
+
+# Nice and simple.
+main () {
+    cmd="$1"
+    shift 1
+    case $(type ${cmd#-}) in
+        "${cmd#-} is a function") ${cmd#-} "$@" ;;
+        *) die "'$cmd' not found" ;;
+    esac
+}
+
+main "$@"

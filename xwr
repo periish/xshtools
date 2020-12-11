@@ -1,0 +1,45 @@
+#!/bin/sh
+
+# xwr: create an x11fs(1) 'rule'
+# takes window 'title', and an xwc command
+
+match () {
+    case $1 in
+        $2) return 0
+    esac
+    return 1
+}
+
+p () printf '%s\n' "$*"
+
+usage () {
+    p "xwr: create a x11fs(1) 'rule'"
+    p "format: xwr title [xwc command]"
+    p "-p sets persist"
+    exit 0
+}
+
+main () {
+    case $1 in
+        -p|-persist) exitcmd=: ; shift 1 ;;
+        -h|-help) usage ;;
+        *) exitcmd="exit" ;;
+    esac
+
+    target=$1 cmd=$2
+    shift 2
+
+    cat "$WM/event" | while read -r ev wid; do
+        match "$ev" CREATE || continue
+
+        read -r title < "$WM/$wid/title"
+
+        match "$title" "$target" && {
+            sleep 0.07; xwc "$cmd" "$wid" "$@"
+            "$exitcmd"
+        }
+    done
+}
+
+main "$@"
+
